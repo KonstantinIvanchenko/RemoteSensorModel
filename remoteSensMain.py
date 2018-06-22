@@ -23,12 +23,20 @@ readDelayMin = 1 #seconds
 readDelayMax = 100#seconds
 refrRateDefault = 2#seconds
 
+
+
 class sysSensorElement:
     def __init__(self):
         self.cpu = Cpu(monitoring_latency=readDelayMin)
         self.memoryVirt = VirtualMemory(monitoring_latency=readDelayMin)
+
+        self.CpuTempServiceName = "cputemp"
+        self.CpuLoadServiceName = "cpuload"
+        self.MemoriesServiceName = "memories"
+
         print('System cpu name: '+str(self.cpu.name))
         print('System cpu count: '+str(self.cpu.count))
+
 
     def get_cpu_load(self):
         # requires refresh of the object via new constractor. Otherwise remains constant
@@ -55,9 +63,14 @@ class dataPublisher:
 
         self.hostAddress = ipv4
 
-        self.bCpuTemp = servicesToPublish[0]
-        self.bCpuLoad = servicesToPublish[1]
-        self.bMemories = servicesToPublish[2]
+        #assign True/False to each service accordingly to input values
+        for pair in servicesToPublish:
+            if sysSensorElement.CpuTempServiceName in servicesToPublish:
+                self.bCpuTemp = pair[1]
+            if sysSensorElement.CpuLoadServiceName in servicesToPublish:
+                self.bCpuLoad = pair[1]
+            if sysSensorElement.MemoriesServiceName in servicesToPublish:
+                self.bMemories = pair[1]
 
 
 #TODO: check port
@@ -81,11 +94,11 @@ class dataPublisher:
     def publish_resources(self, sensor):
 
         if self.bCpuTemp:
-            self.client.publish("cputemp", str(sensor.get_cpu_temp()))
+            self.client.publish(sensor.CpuTempServiceName, str(sensor.get_cpu_temp()))
         if self.bCpuLoad:
-            self.client.publish("cpuload", str(sensor.get_cpu_load()))
+            self.client.publish(sensor.CpuLoadServiceName, str(sensor.get_cpu_load()))
         if self.bMemories:
-            self.client.publish("memvirt", str(sensor.get_mem_virtual()))
+            self.client.publish(sensor.MemoriesServiceName, str(sensor.get_mem_virtual()))
 
 
 #run argument parser
@@ -101,8 +114,10 @@ else:
     refrRate = args.refr
 
 #check inputs
-dp = dataPublisher(args.host, args.p, (True, True, True))
 systemSensor = sysSensorElement()
+dp = dataPublisher(args.host, args.p, ((systemSensor.CpuTempServiceName, True), (systemSensor.CpuLoadServiceName, True),
+                                       (systemSensor.MemoriesServiceName, True)))
+
 dp.connect_to_broker()
 while True:
     dp.publish_resources(systemSensor)

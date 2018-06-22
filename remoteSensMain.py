@@ -65,11 +65,11 @@ class dataPublisher:
 
         #assign True/False to each service accordingly to input values
         for pair in servicesToPublish:
-            if sysSensorElement.CpuTempServiceName in servicesToPublish:
+            if sysSensorElement.CpuTempServiceName in pair:
                 self.bCpuTemp = pair[1]
-            if sysSensorElement.CpuLoadServiceName in servicesToPublish:
+            if sysSensorElement.CpuLoadServiceName in pair:
                 self.bCpuLoad = pair[1]
-            if sysSensorElement.MemoriesServiceName in servicesToPublish:
+            if sysSensorElement.MemoriesServiceName in pair:
                 self.bMemories = pair[1]
 
 

@@ -55,20 +55,10 @@ class dataPublisher:
 
         self.hostAddress = ipv4
 
-        if servicesToPublish[0]:
-            self.bCpuTemp = True
-        else:
-            self.bCpuTemp = False
+        self.bCpuTemp = servicesToPublish[0]
+        self.bCpuLoad = servicesToPublish[1]
+        self.bMemories = servicesToPublish[2]
 
-        if servicesToPublish[1]:
-            self.bCpuLoad = True
-        else:
-            self.bCpuLoad = False
-
-        if servicesToPublish[2]:
-            self.bMemories = True
-        else:
-            self.bMemories = False
 
 #TODO: check port
         self.port = port

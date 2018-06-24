@@ -56,11 +56,6 @@ class dataPublisher:
         self.client = mqtt.Client("ResourceSensor")
         self.client.on_connect = self.on_connect
         self.client.on_disconnect = self.on_disconnect
-        try:
-           ipa.ip_address(ipv4)
-        except Exception as e:
-            print(e)
-
         self.hostAddress = ipv4
 
         #assign True/False to each service accordingly to input values
@@ -116,9 +111,9 @@ else:
 #check inputs
 systemSensor = SysSensorElement()
 dp = dataPublisher(args.host, args.p, systemSensor,
-                   ((systemSensor.CpuTempServiceName, True),
-                    (systemSensor.CpuLoadServiceName, True),
-                    (systemSensor.MemoriesServiceName, True)))
+                   ((systemSensor.CpuTempServiceName, args.ct),
+                    (systemSensor.CpuLoadServiceName, args.cl),
+                    (systemSensor.MemoriesServiceName, args.memo)))
 
 dp.connect_to_broker()
 while True:

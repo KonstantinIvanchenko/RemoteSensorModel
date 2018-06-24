@@ -21,11 +21,11 @@ import ipaddress as ipa
 #wait time to update sensor data locally
 readDelayMin = 1 #seconds
 readDelayMax = 100#seconds
-refrRateDefault = 2#seconds
+refrRateDefault = 1#seconds
 
 
 
-class sysSensorElement:
+class SysSensorElement:
     def __init__(self):
         self.cpu = Cpu(monitoring_latency=readDelayMin)
         self.memoryVirt = VirtualMemory(monitoring_latency=readDelayMin)
@@ -52,7 +52,7 @@ class sysSensorElement:
         return (self.memoryVirt.used, self.memoryVirt.available)
 
 class dataPublisher:
-    def __init__(self, ipv4, port, servicesToPublish):
+    def __init__(self, ipv4, port, sensor_inst, services_to_publish):
         self.client = mqtt.Client("ResourceSensor")
         self.client.on_connect = self.on_connect
         self.client.on_disconnect = self.on_disconnect
@@ -64,12 +64,12 @@ class dataPublisher:
         self.hostAddress = ipv4
 
         #assign True/False to each service accordingly to input values
-        for pair in servicesToPublish:
-            if sysSensorElement.CpuTempServiceName in pair:
+        for pair in services_to_publish:
+            if sensor_inst.CpuTempServiceName in pair:
                 self.bCpuTemp = pair[1]
-            if sysSensorElement.CpuLoadServiceName in pair:
+            if sensor_inst.CpuLoadServiceName in pair:
                 self.bCpuLoad = pair[1]
-            if sysSensorElement.MemoriesServiceName in pair:
+            if sensor_inst.MemoriesServiceName in pair:
                 self.bMemories = pair[1]
 
 
@@ -114,9 +114,11 @@ else:
     refrRate = args.refr
 
 #check inputs
-systemSensor = sysSensorElement()
-dp = dataPublisher(args.host, args.p, ((systemSensor.CpuTempServiceName, True), (systemSensor.CpuLoadServiceName, True),
-                                       (systemSensor.MemoriesServiceName, True)))
+systemSensor = SysSensorElement()
+dp = dataPublisher(args.host, args.p, systemSensor,
+                   ((systemSensor.CpuTempServiceName, True),
+                    (systemSensor.CpuLoadServiceName, True),
+                    (systemSensor.MemoriesServiceName, True)))
 
 dp.connect_to_broker()
 while True:
